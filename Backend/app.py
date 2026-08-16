@@ -5,58 +5,65 @@ from src.constants import YES_NO_COLUMNS
 from src.model_io import load_model_package
 from src.preprocess import build_inference_row
 
+st.set_page_config(page_title="House Price Predictor", page_icon="🏠")
+st.title("House Price Predictor")
+st.caption("Estimate a home's value based on your preferred property features.")
+
 model_path = Path(__file__).resolve().parent / "model" / "house_price_model.pkl"
 model_package = load_model_package(model_path)
 model = model_package["model"]
 
 area = st.number_input(
-    "Enter the area of house you are dreaming about, Uh I mean area that you can afford !",
+    "Total area of the property (sq ft)",
     min_value=0.0,
     value=3000.0,
     step=100.0,
     format="%.0f",
 )
+
 bedrooms = st.number_input(
-    "How many bedrooms do you want in your home, Human, \n Maybe an extra for unwanted guests? ",
+    "Number of bedrooms",
     min_value=0,
     value=3,
     step=1,
 )
+
 bathrooms = st.number_input(
-    " Think how many bathrooms you need?",
+    "Number of bathrooms",
     min_value=0,
     value=2,
-    step=1
+    step=1,
 )
+
 parking = st.number_input(
-    "How many parking spaces do you want? \n If you don't want any, enter 0. \n If you want 1, enter 1. \n If you want more than 1, enter 2.",
+    "Parking spaces",
     min_value=0,
     max_value=3,
     value=1,
-    step=1
+    step=1,
 )
+
 stories = st.number_input(
-    "How many stories do you want in your home?",
+    "Number of floors/stories",
     min_value=0,
     max_value=4,
     value=2,
-    step=1
+    step=1,
 )
 
 furnishingstatus = st.selectbox(
-    "What is your furnishing status preference?",
-    ("Unfurnished", "Semi-furnished", "Furnished")
+    "Furnishing status",
+    ("Unfurnished", "Semi-furnished", "Furnished"),
 )
 
 yes_no_values = {}
 for col in YES_NO_COLUMNS:
     yes_no_values[col] = st.selectbox(
-        f"Do you want {col.replace('_', ' ')}?",
-        ("No", "Yes")
+        f"{col.replace('_', ' ').title()} included?",
+        ("No", "Yes"),
     )
 
-
-if st.button("PREDICT YOUR Future I mean JUST HOME for now :D "):
+if st.button("Predict Home Price"):
     model_input = build_inference_row(
         area=area,
         bedrooms=bedrooms,
@@ -67,5 +74,4 @@ if st.button("PREDICT YOUR Future I mean JUST HOME for now :D "):
         yes_no_values=yes_no_values,
     )
     result = model.predict(model_input)
-    # st.success(f"Your Dream Home Price is: {result[0][0]:,.0f} INR")
-    st.success(f"Your Dream Home Price is: {float(result[0]):,.0f} INR")
+    st.success(f"Estimated Home Price: {float(result[0]):,.0f} INR")
